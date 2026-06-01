@@ -1,0 +1,766 @@
+{
+"stories": [
+{
+"id": "US-01",
+"activity": "A1",
+"activityName": "Tax settings",
+"persona": "Compliance/Admin",
+"role": "compliance administrator",
+"action": "set the active tax regime and the 6% USN Income rate",
+"value": "the platform can calculate tax using approved parameters",
+"ac": [
+"The admin can define USN Income as the active MVP tax regime",
+"The admin can set the tax rate as 6%",
+"The setting is versioned with author and timestamp",
+"The system rejects an empty or non-positive rate"
+],
+"sp": 5,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"Chapter 26.2 Tax Code of Russia",
+"Article 346.20 Tax Code of Russia",
+"Q1"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-02",
+"activity": "A2",
+"activityName": "Realization intake",
+"persona": "Platform",
+"role": "platform service",
+"action": "receive realization posting events with a unique document ID",
+"value": "tax calculation starts automatically after each valid realization",
+"ac": [
+"The platform receives document ID, date, amount, currency, organization, and manager ID",
+"Only posted realization events trigger the calculation pipeline",
+"Duplicate document IDs are ignored without creating a second tax calculation",
+"Rejected events are logged with a technical reason"
+],
+"sp": 3,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"Sales documents database"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-03",
+"activity": "A3",
+"activityName": "Tax calculation",
+"persona": "Platform",
+"role": "platform service",
+"action": "store cumulative revenue from the start of the tax year",
+"value": "each calculation uses the correct year-to-date tax base",
+"ac": [
+"Revenue is accumulated by organization and tax year",
+"A positive realization increases cumulative revenue",
+"A zero or negative realization does not create tax payable and adjusts cumulative revenue when applicable",
+"The register can return the current cumulative amount in under 300 ms for 10000 active monthly documents"
+],
+"sp": 3,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"US-02"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-04",
+"activity": "A3",
+"activityName": "Tax calculation",
+"persona": "Platform",
+"role": "platform service",
+"action": "calculate USN Income tax after realization posting",
+"value": "tax is calculated immediately and consistently without manual Excel work",
+"ac": [
+"The system calculates deal tax as realization amount multiplied by the configured rate",
+"The system calculates cumulative tax as year-to-date revenue multiplied by the configured rate",
+"Amounts below 0.5 RUB are rounded to 1 RUB when tax is payable",
+"The calculation result stores tax base, rate, deal tax, cumulative tax, and timestamp",
+"The calculation completes in under 300 ms for the MVP data volume"
+],
+"sp": 8,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"US-01",
+"US-03",
+"Article 52 Tax Code of Russia",
+"Article 346.21 Tax Code of Russia"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-05",
+"activity": "A1",
+"activityName": "Tax settings",
+"persona": "Platform",
+"role": "platform service",
+"action": "block tax calculation when the required tax rate is missing",
+"value": "incorrect tax amounts are not silently produced",
+"ac": [
+"If the active rate is absent, no tax calculation snapshot is marked successful",
+"The realization receives a calculation error state",
+"The admin sees the message: Configure tax parameters",
+"The error is written to the audit log"
+],
+"sp": 3,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"US-01"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-06",
+"activity": "A4",
+"activityName": "Deal tax visibility",
+"persona": "Sales Manager",
+"role": "sales manager",
+"action": "see the tax amount for my own realization",
+"value": "I understand how the deal affects tax load without seeing full accounting reports",
+"ac": [
+"The realization card shows only the tax amount for the manager's own deal",
+"The manager cannot access the full tax register",
+"If calculation failed, the card shows a concise calculation unavailable state",
+"The displayed amount matches the stored calculation snapshot"
+],
+"sp": 3,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"US-04"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-07",
+"activity": "A5",
+"activityName": "Tax register reporting",
+"persona": "Accountant",
+"role": "accountant",
+"action": "view a simple cumulative revenue and tax report",
+"value": "I can prepare tax control data without manual report consolidation",
+"ac": [
+"The report shows realization date, document ID, amount, cumulative revenue, rate, and cumulative tax",
+"The report can be filtered by organization and tax year",
+"The report is available only to Accountant and Finance Director roles",
+"The report totals match the stored calculation snapshots"
+],
+"sp": 5,
+"sprint": "S1",
+"release": "MVP",
+"priority": "P0",
+"deps": [
+"US-04"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-08",
+"activity": "A3",
+"activityName": "Tax calculation",
+"persona": "Platform",
+"role": "platform service",
+"action": "store accepted expense amounts for USN Income minus Expenses",
+"value": "the platform can calculate tax base for the second USN mode",
+"ac": [
+"Expense records can be linked to organization, tax year, and source document",
+"Only accepted expenses are included in the tax base",
+"Expense totals are available for calculation by period",
+"The data model keeps income and expense sources auditable"
+],
+"sp": 8,
+"sprint": "S2",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-03",
+"Article 346.16 Tax Code of Russia"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-09",
+"activity": "A3",
+"activityName": "Tax calculation",
+"persona": "Platform",
+"role": "platform service",
+"action": "calculate USN Income minus Expenses at 15%",
+"value": "companies using this mode can receive automated tax calculations",
+"ac": [
+"The admin can select USN Income minus Expenses as the active regime",
+"The system calculates tax base as accepted income minus accepted expenses",
+"The system applies a 15% rate by default",
+"Negative tax base does not create positive tax payable",
+"The calculation snapshot identifies the selected regime"
+],
+"sp": 8,
+"sprint": "S2",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-01",
+"US-04",
+"US-08",
+"Article 346.20 Tax Code of Russia"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-10",
+"activity": "A6",
+"activityName": "Limits monitoring",
+"persona": "Platform",
+"role": "platform service",
+"action": "maintain USN revenue thresholds for 150, 200, and 450 million RUB",
+"value": "limit checks use consistent regulatory thresholds",
+"ac": [
+"The MVP/R1 thresholds are available to the calculation service",
+"Threshold values are stored with effective dates",
+"The system can identify the next threshold above current revenue",
+"Threshold changes are audit logged"
+],
+"sp": 5,
+"sprint": "S2",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"Article 346.12 Tax Code of Russia",
+"Q5"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-11",
+"activity": "A6",
+"activityName": "Limits monitoring",
+"persona": "Platform",
+"role": "platform service",
+"action": "detect when cumulative revenue crosses a USN threshold",
+"value": "finance can react before the company loses the special tax regime",
+"ac": [
+"The system compares revenue before and after each realization",
+"A crossing event is created only when a threshold is newly crossed",
+"The event includes threshold, previous revenue, new revenue, and source document ID",
+"Duplicate realization processing does not create duplicate crossing events"
+],
+"sp": 5,
+"sprint": "S2",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-03",
+"US-10"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-12",
+"activity": "A2",
+"activityName": "Realization intake",
+"persona": "Platform",
+"role": "platform service",
+"action": "flag backdated realizations posted into a closed period",
+"value": "accounting can manually review calculations that may be inaccurate",
+"ac": [
+"The system identifies realizations dated before the current closed-period boundary",
+"The realization is not blocked from posting",
+"The tax calculation snapshot is marked requires_manual_review",
+"The accountant sees the review flag in the tax register"
+],
+"sp": 3,
+"sprint": "S2",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-04",
+"Q4"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-13",
+"activity": "A6",
+"activityName": "Limits monitoring",
+"persona": "Finance Director",
+"role": "finance director",
+"action": "receive an email warning when a USN limit is exceeded",
+"value": "I can start tax regime transition actions on time",
+"ac": [
+"The email is sent to configured finance recipients after a threshold crossing event",
+"The message includes organization, crossed threshold, revenue after posting, and document ID",
+"A failed email send is retried and logged",
+"The same crossing event is not emailed more than once"
+],
+"sp": 3,
+"sprint": "S3",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-11",
+"Email service"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-14",
+"activity": "A7",
+"activityName": "Manual corrections",
+"persona": "Accountant",
+"role": "accountant",
+"action": "manually correct a tax calculation with a comment",
+"value": "I can handle exceptional accounting cases while preserving traceability",
+"ac": [
+"The accountant can adjust tax base or tax amount on a calculation snapshot",
+"A non-empty correction comment is required",
+"The original calculated values remain visible",
+"The correction author and timestamp are audit logged"
+],
+"sp": 5,
+"sprint": "S3",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-04"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-15",
+"activity": "A10",
+"activityName": "Audit and compliance",
+"persona": "Platform",
+"role": "platform service",
+"action": "store immutable tax calculation snapshots for every realization version",
+"value": "calculation history remains transparent after document changes",
+"ac": [
+"Each calculation snapshot stores source document version and input values",
+"Recalculation creates a new snapshot instead of overwriting the old one",
+"Snapshots can be queried by document ID and tax year",
+"Audit events link document changes to calculation versions"
+],
+"sp": 5,
+"sprint": "S3",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-04",
+"Q4"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-16",
+"activity": "A10",
+"activityName": "Audit and compliance",
+"persona": "Compliance/Admin",
+"role": "compliance administrator",
+"action": "enforce role-based access to tax registers and settings",
+"value": "sensitive tax data is visible only to authorized roles",
+"ac": [
+"Only Accountant and Finance Director can view the full tax register",
+"Only Compliance/Admin can change tax settings",
+"Sales Manager can view only own deal tax amount",
+"All access denials and privileged actions are logged"
+],
+"sp": 5,
+"sprint": "S3",
+"release": "R1",
+"priority": "P1",
+"deps": [
+"US-06",
+"US-07"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-17",
+"activity": "A8",
+"activityName": "Forecasting",
+"persona": "Platform",
+"role": "platform service",
+"action": "forecast next quarter tax using linear extrapolation",
+"value": "finance can estimate future payment obligations before period close",
+"ac": [
+"The forecast uses historical realization data from the current tax year",
+"The forecast outputs expected revenue, tax base, and tax amount",
+"The forecast states the method and input period used",
+"If there is insufficient history, the system returns forecast unavailable"
+],
+"sp": 8,
+"sprint": "S4",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-15",
+"Q2"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-18",
+"activity": "A8",
+"activityName": "Forecasting",
+"persona": "Finance Director",
+"role": "finance director",
+"action": "view the next quarter tax forecast in the tax report",
+"value": "I can plan cash flow for upcoming tax payments",
+"ac": [
+"The report shows forecast revenue, forecast tax, and confidence note",
+"The forecast is separated from actual tax payable",
+"The user can filter the forecast by organization",
+"The report shows when the forecast was last generated"
+],
+"sp": 5,
+"sprint": "S4",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-17"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-19",
+"activity": "A9",
+"activityName": "External integrations",
+"persona": "Accountant",
+"role": "accountant",
+"action": "export tax register data in a format suitable for declaration preparation",
+"value": "I can reuse platform data for FNS declaration workflows",
+"ac": [
+"The export includes organization, period, revenue, expense where applicable, tax base, tax amount, and correction markers",
+"The export is generated from calculation snapshots",
+"The export can be downloaded by Accountant and Finance Director roles",
+"The export contains a generation timestamp and source data version"
+],
+"sp": 8,
+"sprint": "S4",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-15",
+"L3"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-20",
+"activity": "A9",
+"activityName": "External integrations",
+"persona": "Platform",
+"role": "platform service",
+"action": "send prepared declaration data to the FNS channel through an EDI operator",
+"value": "accounting can reduce manual declaration data entry",
+"ac": [
+"The integration sends only approved export packages",
+"The request and response are logged with correlation ID",
+"Failed submissions keep the package available for retry",
+"The integration status is visible to Accountant and Finance Director roles"
+],
+"sp": 13,
+"sprint": "S5",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-19",
+"External FNS API",
+"EDI operator",
+"L3"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-21",
+"activity": "A9",
+"activityName": "External integrations",
+"persona": "Platform",
+"role": "platform service",
+"action": "receive realization documents from external ERP systems through an API",
+"value": "external systems can trigger the same tax calculation flow",
+"ac": [
+"The API accepts realization document payloads with required tax calculation fields",
+"The API validates uniqueness of external document IDs",
+"Accepted documents enter the same pipeline as internal realization events",
+"Invalid payloads return structured validation errors"
+],
+"sp": 8,
+"sprint": "S4",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-02",
+"External ERP systems"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-22",
+"activity": "A9",
+"activityName": "External integrations",
+"persona": "Platform",
+"role": "platform service",
+"action": "expose tax calculation snapshots through a secure API",
+"value": "external ERP systems can reconcile tax results with platform records",
+"ac": [
+"The API returns snapshots by organization, period, and document ID",
+"The API requires service authentication",
+"The API never exposes data across unauthorized organizations",
+"Responses include snapshot version and correction status"
+],
+"sp": 8,
+"sprint": "S5",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-15",
+"US-16",
+"External ERP systems"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-23",
+"activity": "A1",
+"activityName": "Tax settings",
+"persona": "Compliance/Admin",
+"role": "compliance administrator",
+"action": "manage tax thresholds and rounding rules through the admin interface",
+"value": "regulatory parameters can be updated without a code release",
+"ac": [
+"The admin can create a new effective-dated threshold set",
+"The admin can update rounding rules within allowed validation constraints",
+"Existing calculations keep the parameter version used at calculation time",
+"All changes are audit logged"
+],
+"sp": 5,
+"sprint": "S5",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-10",
+"US-11"
+],
+"status": "todo",
+"tfsPbi": []
+},
+{
+"id": "US-24",
+"activity": "A9",
+"activityName": "External integrations",
+"persona": "Platform",
+"role": "platform service",
+"action": "receive tax payment status from a payment gateway",
+"value": "future automatic tax payment workflows can reconcile payment results",
+"ac": [
+"The platform accepts payment status callbacks for tax payment references",
+"Callbacks are authenticated and logged",
+"Unknown payment references are rejected",
+"Payment status is stored separately from calculated tax payable"
+],
+"sp": 3,
+"sprint": "S5",
+"release": "R2",
+"priority": "P2",
+"deps": [
+"US-04",
+"Payment gateway"
+],
+"status": "todo",
+"tfsPbi": []
+}
+],
+"activities": [
+{
+"code": "A1",
+"name": "Tax settings"
+},
+{
+"code": "A2",
+"name": "Realization intake"
+},
+{
+"code": "A3",
+"name": "Tax calculation"
+},
+{
+"code": "A4",
+"name": "Deal tax visibility"
+},
+{
+"code": "A5",
+"name": "Tax register reporting"
+},
+{
+"code": "A6",
+"name": "Limits monitoring"
+},
+{
+"code": "A7",
+"name": "Manual corrections"
+},
+{
+"code": "A8",
+"name": "Forecasting"
+},
+{
+"code": "A9",
+"name": "External integrations"
+},
+{
+"code": "A10",
+"name": "Audit and compliance"
+}
+],
+"activityOrder": [
+"A1",
+"A2",
+"A3",
+"A4",
+"A5",
+"A6",
+"A7",
+"A8",
+"A9",
+"A10"
+],
+"sprints": [
+{
+"code": "S1",
+"start": "2026-06-01",
+"end": "2026-06-14",
+"release": "MVP",
+"capacity": 30
+},
+{
+"code": "S2",
+"start": "2026-06-15",
+"end": "2026-06-28",
+"release": "R1",
+"capacity": 30
+},
+{
+"code": "S3",
+"start": "2026-06-29",
+"end": "2026-07-12",
+"release": "R1",
+"capacity": 30
+},
+{
+"code": "S4",
+"start": "2026-07-13",
+"end": "2026-07-26",
+"release": "R2",
+"capacity": 30
+},
+{
+"code": "S5",
+"start": "2026-07-27",
+"end": "2026-08-09",
+"release": "R2",
+"capacity": 30
+}
+],
+"personas": [
+{
+"name": "Sales Manager",
+"desc": "Creates realization documents and sees tax impact only for own deals",
+"color": "#2563EB"
+},
+{
+"name": "Finance Director",
+"desc": "Monitors accumulated tax, limits, forecasts, and business risk",
+"color": "#7C3AED"
+},
+{
+"name": "Accountant",
+"desc": "Uses tax register, reviews calculation history, corrections, and declaration exports",
+"color": "#059669"
+},
+{
+"name": "Compliance/Admin",
+"desc": "Configures tax parameters, thresholds, rounding rules, and access controls",
+"color": "#D97706"
+},
+{
+"name": "Platform",
+"desc": "Backend/system role that processes realization events, calculates tax, stores snapshots, checks limits, and integrates with external services",
+"color": "#64748B"
+}
+],
+"spHours": 8,
+"milestones": [
+{
+"date": "2026-06-14",
+"label": "MVP release: USN Income 6% automatic calculation"
+},
+{
+"date": "2026-07-12",
+"label": "R1 release: Income minus Expenses, limits, corrections, audit"
+},
+{
+"date": "2026-08-09",
+"label": "R2 release: forecast, FNS/EDI and ERP APIs"
+}
+],
+"legal": [
+{
+"code": "L1",
+"name": "Validate USN calculation logic against Chapter 26.2 of the Tax Code of Russia",
+"start": "2026-06-01",
+"end": "2026-06-14",
+"critical": true
+},
+{
+"code": "L2",
+"name": "Confirm actual company tax regime, advance payment treatment, and RUB-only MVP assumption",
+"start": "2026-06-01",
+"end": "2026-06-14",
+"critical": true
+},
+{
+"code": "L3",
+"name": "Confirm FNS/EDI declaration export requirements and data retention obligations",
+"start": "2026-07-13",
+"end": "2026-08-09",
+"critical": true
+}
+],
+"versions": [],
+"currentVersionId": null,
+"exportedAt": "2026-06-01T00:00:00.000Z"
+}
